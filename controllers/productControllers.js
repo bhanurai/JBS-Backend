@@ -6,6 +6,7 @@ const createProduct = async (req, res) => {
   console.log(req.body);
   console.log(req.files);
 
+  
   // step 2 : Destructuring data
   const { productName, productPrice, productDescription, productCategory } =
     req.body;
