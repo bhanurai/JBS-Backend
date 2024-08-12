@@ -135,6 +135,7 @@ const loginUser = async (req, res) => {
         message: "User does not exist.",
       });
     }
+    
 
     // Check if account is locked
 if (user.accountLocked) {
