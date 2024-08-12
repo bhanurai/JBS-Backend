@@ -106,6 +106,7 @@ const loginUser = async (req, res) => {
       token: token,
       userData: user,
       isAdmin: user.isAdmin,
+      
     });
   } catch (error) {
     console.log(error);
