@@ -1,6 +1,7 @@
 const Favorite = require("../model/favoriteModel");
 const User = require("../model/userModel");
 
+
 const addToFavorites = async (req, res) => {
   try {
     const { userId, productId } = req.body;
