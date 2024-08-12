@@ -12,6 +12,7 @@ const addToFavorites = async (req, res) => {
         message: "User ID and Product ID are required fields",
       });
     }
+    
 
     let favorite = await Favorite.findOne({ user: userId });
 
