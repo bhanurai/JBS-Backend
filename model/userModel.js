@@ -13,13 +13,18 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'bhanurai001@gmail.com'],
+    match: [/^\w+([.-]?\w+)@\w+([.-]?\w+)(\.\w{2,3})+$/, 'bhanurai001@gmail.com'],
   },
   
   password: {
     type: String,
     required: true,
   },
+  confirmPassword: {
+    type: String,
+    required: true,
+  },
+
   contact: {
     type: String,
     required: false,
