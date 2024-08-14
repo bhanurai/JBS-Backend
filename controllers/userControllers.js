@@ -136,6 +136,91 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Check if account is locked
+if (user.accountLocked) {
+  const lockoutDurationMillis = Date.now() - user.lastFailedLoginAttempt;
+  const lockoutDurationSeconds = lockoutDurationMillis / 1000; // convert to seconds
+
+  if (lockoutDurationSeconds >= 120) { // 2 minutes in seconds
+      // Unlock the account
+      user.accountLocked = false;
+      user.failedLoginAttempts = 0;
+      await user.save();
+  } else {
+      const timeRemainingSeconds = 120 - lockoutDurationSeconds;
+      const minutes = Math.floor(timeRemainingSeconds / 60);
+      const seconds = Math.floor(timeRemainingSeconds % 60);
+
+      return res.status(400).json({
+          success: false,
+          message:"Account is locked. Please try again later after ${minutes} minutes and ${seconds} seconds."
+      });
+  }
+}
+  // Check password expiry
+  const checkPasswordExpiry = (user) => {
+    const passwordExpiryDays = 90; // Set the password expiry duration in days
+    const currentDate = new Date();
+    const lastPasswordChangeDate = user.passwordChangeDate || user.createdAt;
+
+    const daysSinceLastChange = Math.floor(
+        (currentDate - lastPasswordChangeDate) / (1000 * 60 * 60 * 24)
+    );
+
+    const daysRemaining = passwordExpiryDays - daysSinceLastChange;
+
+    if (daysRemaining <= 3 && daysRemaining > 0) {
+        const message = "Your password will expire in ${daysRemaining} days. Please change your password.";
+        return {
+            expired: false,
+            daysRemaining: daysRemaining,
+            message: message
+          };
+        }
+
+        return {
+            expired: daysSinceLastChange >= passwordExpiryDays,
+            daysRemaining: daysRemaining,
+            message: null
+        };
+    };
+ // Compare password
+ const isPasswordValid = await bcrypt.compare(password, user.password);
+ if (!isPasswordValid) {
+     // Increment failed login attempts and update last failed login timestamp
+     user.failedLoginAttempts += 1;
+     user.lastFailedLoginAttempt = Date.now();
+
+     // Check if the maximum allowed failed attempts is reached
+     if (user.failedLoginAttempts >= 4) {
+         // Lock the account
+         user.accountLocked = true;
+         await user.save();
+         return res.json({
+             success: false,
+             message: "Account is locked. Please try again later."
+         });
+     }
+     await user.save();
+     return res.json({
+         success: false,
+         message: "Incorrect Password."
+     });
+ }
+
+ // Reset failed login attempts and last failed login timestamp on successful login
+ user.failedLoginAttempts = 0;
+ user.lastFailedLoginAttempt = null;
+ await user.save();
+
+ // Check if the account is still locked after successful login
+ if (user.accountLocked) {
+     return res.json({
+         success: false,
+         message: "Account is locked. Please try again later."
+     });
+ }
+    
     const databasePassword = user.password;
     const isMatched = await bcrypt.compare(password, databasePassword);
 

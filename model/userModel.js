@@ -37,6 +37,7 @@ const userSchema = mongoose.Schema({
     type: String,
     required: false,
   },
+ 
   token: {
     type: String,
     default: "",
@@ -48,6 +49,27 @@ const userSchema = mongoose.Schema({
   userImageUrl: {
     type: String,
     required: false,
+  },
+
+  failedLoginAttempts: {
+    type: Number,
+    default: 0,
+  },
+  accountLocked: {
+    type: Boolean,
+    default: false,
+  },
+  lastFailedLoginAttempt: {
+    type: Date,
+    default: null,
+  },
+  resetPasswordToken: {
+    type: String,
+    default: null,
+  },
+  resetPasswordExpires: {
+    type: Date,
+    default: null,
   },
 });
 
